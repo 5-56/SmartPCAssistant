@@ -1,0 +1,83 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:SmartPCAssistant.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="500"
+        x:Class="SmartPCAssistant.Views.LogViewerWindow"
+        x:DataType="vm:LogViewerViewModel"
+        Title="日志查看器"
+        Width="700"
+        Height="500"
+        WindowStartupLocation="CenterOwner">
+
+    <Design.DataContext>
+        <vm:LogViewerViewModel/>
+    </Design.DataContext>
+
+    <Window.Styles>
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="#1E1E2E"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="12"/>
+        </Style>
+        <Style Selector="Button.action">
+            <Setter Property="Background" Value="#3B82F6"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="12,8"/>
+        </Style>
+        <Style Selector="Button.secondary">
+            <Setter Property="Background" Value="#374151"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="12,8"/>
+        </Style>
+        <Style Selector="TextBlock.log-info">
+            <Setter Property="Foreground" Value="#22C55E"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style Selector="TextBlock.log-warn">
+            <Setter Property="Foreground" Value="#F59E0B"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style Selector="TextBlock.log-error">
+            <Setter Property="Foreground" Value="#EF4444"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,*" Margin="16">
+        <Border Grid.Row="0" Classes="card" Margin="0,0,0,12">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="日志查看器" FontSize="16" FontWeight="SemiBold" Foreground="White"/>
+                    <TextBlock Text="{Binding CurrentLogFile}" FontSize="11" Foreground="#9CA3AF" TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+                <Button Grid.Column="1" Command="{Binding RefreshLogsCommand}" Classes="secondary" Content="刷新" Margin="0,0,8,0"/>
+                <Button Grid.Column="2" Command="{Binding ClearLogsCommand}" Classes="secondary" Content="清空" Margin="0,0,8,0"/>
+                <Button Grid.Column="3" Command="{Binding OpenLogFolderCommand}" Classes="action" Content="打开文件夹"/>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1" Classes="card">
+            <ListBox ItemsSource="{Binding LogEntries}" Background="Transparent" BorderThickness="0">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid ColumnDefinitions="80,50,*">
+                            <TextBlock Grid.Column="0" Text="{Binding Timestamp}" FontFamily="Consolas" FontSize="11" Foreground="#9CA3AF"/>
+                            <TextBlock Grid.Column="1" Text="{Binding Level}" FontFamily="Consolas" FontSize="11" FontWeight="SemiBold"
+                                       Foreground="{Binding Level, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=错误,
+                                              TargetNullValue=#EF4444, FallbackValue=#9CA3AF}"/>
+                            <TextBlock Grid.Column="2" Text="{Binding Message}" FontFamily="Consolas" FontSize="11"
+                                       Foreground="#E5E7EB" TextWrapping="Wrap"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Border>
+    </Grid>
+</Window>

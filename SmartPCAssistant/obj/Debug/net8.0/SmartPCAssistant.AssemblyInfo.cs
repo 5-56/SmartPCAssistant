@@ -10,10 +10,12 @@
 using System;
 using System.Reflection;
 
-[assembly: System.Reflection.AssemblyCompanyAttribute("SmartPCAssistant")]
+[assembly: System.Reflection.AssemblyCompanyAttribute("SmartPCAssistant Team")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
+[assembly: System.Reflection.AssemblyCopyrightAttribute("Copyright © 2024")]
+[assembly: System.Reflection.AssemblyDescriptionAttribute("全智能控制电脑的AI助手")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e80d74730a8d7882342130e02846063abc60c438")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+363cf4e0edc803478f0475de8d9f29b6c0ed9a82")]
 [assembly: System.Reflection.AssemblyProductAttribute("SmartPCAssistant")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SmartPCAssistant")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

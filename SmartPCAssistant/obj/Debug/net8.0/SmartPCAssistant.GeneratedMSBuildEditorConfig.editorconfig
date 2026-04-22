@@ -25,6 +25,9 @@ build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 [/workspace/SmartPCAssistant/Views/FloatBallWindow.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
+[/workspace/SmartPCAssistant/Views/LogViewerWindow.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
 [/workspace/SmartPCAssistant/Views/MainWindow.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
