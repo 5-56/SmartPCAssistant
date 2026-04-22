@@ -45,11 +45,16 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private string _listeningStatus = "准备就绪";
 
+    [ObservableProperty]
+    private string _statusMessage = string.Empty;
+
     public ObservableCollection<SessionMessage> Messages { get; } = new();
     public ObservableCollection<TaskStep> TaskSteps { get; } = new();
     public ObservableCollection<Session> SessionHistory { get; } = new();
+    public ObservableCollection<string> AvailableModels { get; } = new();
 
     private readonly SessionService _sessionService;
+    private readonly TaskEngine _taskEngine;
     private Window? _mainWindow;
     private Window? _floatBallWindow;
     private CancellationTokenSource? _listeningCts;
@@ -57,11 +62,22 @@ public partial class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel()
     {
         _sessionService = SessionService.Instance;
+        _taskEngine = TaskEngine.Instance;
         _sessionService.SessionChanged += OnSessionChanged;
         _sessionService.MessagesChanged += OnMessagesChanged;
         _sessionService.StepsChanged += OnStepsChanged;
 
+        InitializeModels();
         _ = InitializeAsync();
+    }
+
+    private void InitializeModels()
+    {
+        AvailableModels.Clear();
+        foreach (var model in AiProviderService.Instance.GetAvailableModels())
+        {
+            AvailableModels.Add(model);
+        }
     }
 
     public void SetMainWindow(Window window)
@@ -78,6 +94,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         try
         {
+            StatusMessage = "正在初始化...";
             await AiProviderService.Instance.InitializeAsync();
             await LoadSessionHistoryAsync();
 
@@ -90,11 +107,13 @@ public partial class MainWindowViewModel : ViewModelBase
                 UpdateFromCurrentSession();
             }
 
-            Log.Information("MainWindowViewModel initialized");
+            StatusMessage = "就绪";
+            Log.Information("MainWindowViewModel initialized successfully");
         }
         catch (Exception ex)
         {
             Log.Error(ex, "Failed to initialize MainWindowViewModel");
+            StatusMessage = "初始化失败";
         }
     }
 
@@ -170,15 +189,22 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private async Task LoadSessionHistoryAsync()
     {
-        var sessions = await _sessionService.GetAllSessionsAsync();
-        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        try
         {
-            SessionHistory.Clear();
-            foreach (var session in sessions)
+            var sessions = await _sessionService.GetAllSessionsAsync();
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
             {
-                SessionHistory.Add(session);
-            }
-        });
+                SessionHistory.Clear();
+                foreach (var session in sessions)
+                {
+                    SessionHistory.Add(session);
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to load session history");
+        }
     }
 
     [RelayCommand]
@@ -189,15 +215,44 @@ public partial class MainWindowViewModel : ViewModelBase
         var input = UserInput;
         UserInput = string.Empty;
         IsProcessing = true;
+        StatusMessage = "处理中...";
 
         try
         {
-            await _sessionService.ProcessUserInputAsync(input);
+            var request = _taskEngine.ParseRequest(input);
+            Log.Information("Parsed task type: {Type}, target: {Target}", request.Type, request.Target);
+
+            if (request.Type != TaskType.Unknown)
+            {
+                StatusMessage = $"执行任务: {request.Type}";
+                var result = await _taskEngine.ExecuteAsync(request);
+
+                if (result.Success)
+                {
+                    await _sessionService.AddAssistantMessageAsync(result.Message);
+                    foreach (var step in result.Steps)
+                    {
+                        await _sessionService.AddTaskStepAsync(step);
+                    }
+                }
+                else
+                {
+                    await _sessionService.AddAssistantMessageAsync($"执行失败: {result.Error}");
+                }
+            }
+            else
+            {
+                await _sessionService.ProcessUserInputAsync(input);
+            }
+
             await LoadSessionHistoryAsync();
+            StatusMessage = "完成";
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Error sending message");
+            Log.Error(ex, "Error processing message");
+            StatusMessage = $"错误: {ex.Message}";
+            await _sessionService.AddAssistantMessageAsync($"发生错误: {ex.Message}");
         }
         finally
         {
@@ -208,30 +263,67 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private async Task NewSession()
     {
-        await _sessionService.StartNewSessionAsync();
-        await LoadSessionHistoryAsync();
+        try
+        {
+            StatusMessage = "创建新对话...";
+            await _sessionService.StartNewSessionAsync();
+            await LoadSessionHistoryAsync();
+            StatusMessage = "就绪";
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to create new session");
+            StatusMessage = "创建失败";
+        }
     }
 
     [RelayCommand]
     private async Task LoadSession(Session? session)
     {
         if (session == null) return;
-        await _sessionService.LoadSessionAsync(session.Id);
+        try
+        {
+            StatusMessage = "加载对话...";
+            await _sessionService.LoadSessionAsync(session.Id);
+            StatusMessage = "就绪";
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to load session");
+            StatusMessage = "加载失败";
+        }
     }
 
     [RelayCommand]
     private async Task DeleteSession(Session? session)
     {
         if (session == null) return;
-        await _sessionService.DeleteSessionAsync(session.Id);
-        await LoadSessionHistoryAsync();
+        try
+        {
+            await _sessionService.DeleteSessionAsync(session.Id);
+            await LoadSessionHistoryAsync();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to delete session");
+        }
     }
 
     [RelayCommand]
     private async Task EndSession()
     {
-        await _sessionService.EndCurrentSessionAsync();
-        await LoadSessionHistoryAsync();
+        try
+        {
+            StatusMessage = "结束对话...";
+            await _sessionService.EndCurrentSessionAsync();
+            await LoadSessionHistoryAsync();
+            StatusMessage = "就绪";
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to end session");
+            StatusMessage = "结束失败";
+        }
     }
 
     [RelayCommand]
@@ -243,12 +335,19 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void OpenSettings()
     {
-        var settingsWindow = new SettingsWindow
+        try
         {
-            DataContext = new SettingsViewModel()
-        };
-        settingsWindow.Show();
-        IsSettingsOpen = true;
+            var settingsWindow = new SettingsWindow
+            {
+                DataContext = new SettingsViewModel()
+            };
+            settingsWindow.Show();
+            IsSettingsOpen = true;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to open settings");
+        }
     }
 
     [RelayCommand]
@@ -273,10 +372,10 @@ public partial class MainWindowViewModel : ViewModelBase
             _listeningCts = new CancellationTokenSource();
             IsListening = true;
             ListeningStatus = "正在聆听...";
+            StatusMessage = "语音输入中...";
             Log.Information("Started listening");
 
-            var speechService = SpeechService.Instance;
-            var recognizedText = await speechService.RecognizeFromMicrophoneAsync(_listeningCts.Token);
+            var recognizedText = await SpeechService.Instance.RecognizeFromMicrophoneAsync(_listeningCts.Token);
 
             if (!string.IsNullOrWhiteSpace(recognizedText))
             {
@@ -285,11 +384,13 @@ public partial class MainWindowViewModel : ViewModelBase
             }
 
             ListeningStatus = "准备就绪";
+            StatusMessage = "就绪";
         }
         catch (Exception ex)
         {
             Log.Error(ex, "Listening failed");
             ListeningStatus = "聆听失败";
+            StatusMessage = "语音输入失败";
         }
         finally
         {
@@ -304,6 +405,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _listeningCts = null;
         IsListening = false;
         ListeningStatus = "已停止";
+        StatusMessage = "就绪";
         Log.Information("Stopped listening");
     }
 
@@ -317,11 +419,14 @@ public partial class MainWindowViewModel : ViewModelBase
 
         try
         {
+            StatusMessage = "朗读中...";
             await SpeechService.Instance.SpeakAsync(lastAssistantMessage.Content);
+            StatusMessage = "完成";
         }
         catch (Exception ex)
         {
             Log.Error(ex, "Speech failed");
+            StatusMessage = "朗读失败";
         }
     }
 
@@ -351,6 +456,7 @@ public partial class MainWindowViewModel : ViewModelBase
         try
         {
             IsProcessing = true;
+            StatusMessage = "搜索和学习...";
             ListeningStatus = "正在搜索和学习...";
 
             var response = await LearningService.Instance.LearnAndExecuteAsync(UserInput);
@@ -358,11 +464,13 @@ public partial class MainWindowViewModel : ViewModelBase
             await LoadSessionHistoryAsync();
 
             ListeningStatus = "准备就绪";
+            StatusMessage = "完成";
         }
         catch (Exception ex)
         {
             Log.Error(ex, "Search and learn failed");
             ListeningStatus = "学习失败";
+            StatusMessage = "搜索失败";
         }
         finally
         {
@@ -378,6 +486,7 @@ public partial class MainWindowViewModel : ViewModelBase
         try
         {
             IsProcessing = true;
+            StatusMessage = "执行任务...";
             ListeningStatus = "正在执行...";
 
             var steps = await LearningService.Instance.GetStepByStepGuideAsync(UserInput);
@@ -389,15 +498,34 @@ public partial class MainWindowViewModel : ViewModelBase
             }
 
             ListeningStatus = "执行完成";
+            StatusMessage = "完成";
         }
         catch (Exception ex)
         {
             Log.Error(ex, "Execute task failed");
             ListeningStatus = "执行失败";
+            StatusMessage = "执行失败";
         }
         finally
         {
             IsProcessing = false;
+        }
+    }
+
+    [RelayCommand]
+    private void OpenLogViewer()
+    {
+        try
+        {
+            var logViewerWindow = new LogViewerWindow
+            {
+                DataContext = new LogViewerViewModel()
+            };
+            logViewerWindow.Show();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to open log viewer");
         }
     }
 }

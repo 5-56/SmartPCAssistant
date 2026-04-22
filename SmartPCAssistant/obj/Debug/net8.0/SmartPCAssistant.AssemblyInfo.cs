@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCopyrightAttribute("Copyright © 2024")]
 [assembly: System.Reflection.AssemblyDescriptionAttribute("全智能控制电脑的AI助手")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+363cf4e0edc803478f0475de8d9f29b6c0ed9a82")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ed5d6a2e02836565cf3c1c93defe60a69c027411")]
 [assembly: System.Reflection.AssemblyProductAttribute("SmartPCAssistant")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SmartPCAssistant")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

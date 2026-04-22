@@ -59,7 +59,7 @@ public partial class App : Application
                 viewModel.SetFloatBallWindow(_floatBallWindow);
             };
 
-            _floatBallWindow.Clicked += async (s, e) =>
+            _floatBallWindow.Clicked += (s, e) =>
             {
                 if (_mainWindow.WindowState == WindowState.Minimized || !_mainWindow.IsVisible)
                 {
