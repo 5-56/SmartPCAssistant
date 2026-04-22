@@ -12,6 +12,8 @@ public partial class FloatBallWindow : Window
     private Point _startPosition;
     private Point _windowStartPosition;
 
+    public event EventHandler? Clicked;
+
     public FloatBallWindow()
     {
         InitializeComponent();
@@ -19,13 +21,26 @@ public partial class FloatBallWindow : Window
 
     private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        _isDragging = true;
-        _startPosition = e.GetPosition(this);
-        _windowStartPosition = new Point(Position.X, Position.Y);
+        var properties = e.GetCurrentPoint(this).Properties;
+        if (properties.IsLeftButtonPressed)
+        {
+            _isDragging = true;
+            _startPosition = e.GetPosition(this);
+            _windowStartPosition = new Point(Position.X, Position.Y);
+        }
     }
 
     private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
     {
+        if (_isDragging)
+        {
+            var delta = e.GetPosition(this) - _startPosition;
+
+            if (Math.Abs(delta.X) < 5 && Math.Abs(delta.Y) < 5)
+            {
+                Clicked?.Invoke(this, EventArgs.Empty);
+            }
+        }
         _isDragging = false;
     }
 
@@ -41,10 +56,5 @@ public partial class FloatBallWindow : Window
 
             Position = new PixelPoint((int)newX, (int)newY);
         }
-    }
-
-    protected override void OnClosed(EventArgs e)
-    {
-        base.OnClosed(e);
     }
 }

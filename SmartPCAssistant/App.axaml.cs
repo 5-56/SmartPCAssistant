@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using SmartPCAssistant.ViewModels;
@@ -11,6 +12,9 @@ namespace SmartPCAssistant;
 
 public partial class App : Application
 {
+    private MainWindow? _mainWindow;
+    private FloatBallWindow? _floatBallWindow;
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -36,17 +40,48 @@ public partial class App : Application
             .WriteTo.File(logPath, rollingInterval: RollingInterval.Day)
             .CreateLogger();
 
-        Log.Information("SmartPCAssistant UI starting...");
+        Log.Information("SmartPCAssistant starting...");
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            var mainWindow = new MainWindow
+            var viewModel = new MainWindowViewModel();
+
+            _mainWindow = new MainWindow
             {
-                DataContext = new MainWindowViewModel()
+                DataContext = viewModel
             };
 
-            desktop.MainWindow = mainWindow;
+            viewModel.SetMainWindow(_mainWindow);
+
+            _floatBallWindow = new FloatBallWindow();
+            _floatBallWindow.Opened += (s, e) =>
+            {
+                viewModel.SetFloatBallWindow(_floatBallWindow);
+            };
+
+            _floatBallWindow.Clicked += async (s, e) =>
+            {
+                if (_mainWindow.WindowState == WindowState.Minimized || !_mainWindow.IsVisible)
+                {
+                    _mainWindow.WindowState = WindowState.Normal;
+                    _mainWindow.Show();
+                }
+                _mainWindow.Activate();
+                _mainWindow.Focus();
+            };
+
+            desktop.MainWindow = _mainWindow;
             desktop.ShutdownMode = Avalonia.Controls.ShutdownMode.OnMainWindowClose;
+
+            desktop.ShutdownRequested += (s, e) =>
+            {
+                _floatBallWindow?.Close();
+                Log.Information("Application shutting down");
+            };
+
+            _floatBallWindow.Show();
+
+            Log.Information("Main window and float ball initialized");
         }
 
         base.OnFrameworkInitializationCompleted();

@@ -43,6 +43,25 @@
         <Style Selector="Button.secondary:pointerover">
             <Setter Property="Background" Value="#4B5563"/>
         </Style>
+        <Style Selector="Button.icon">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#9CA3AF"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="FontSize" Value="16"/>
+        </Style>
+        <Style Selector="Button.icon:pointerover">
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style Selector="Button.listbtn">
+            <Setter Property="Background" Value="#374151"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="6,2"/>
+            <Setter Property="FontSize" Value="11"/>
+        </Style>
+        <Style Selector="Button.listbtn:pointerover">
+            <Setter Property="Background" Value="#4B5563"/>
+        </Style>
         <Style Selector="Button.danger">
             <Setter Property="Background" Value="#EF4444"/>
             <Setter Property="Foreground" Value="White"/>
@@ -52,6 +71,19 @@
         </Style>
         <Style Selector="Button.danger:pointerover">
             <Setter Property="Background" Value="#DC2626"/>
+        </Style>
+        <Style Selector="Button.listen">
+            <Setter Property="Background" Value="#10B981"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CornerRadius" Value="20"/>
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="40"/>
+        </Style>
+        <Style Selector="Button.listen:pointerover">
+            <Setter Property="Background" Value="#059669"/>
+        </Style>
+        <Style Selector="Button.listen.active">
+            <Setter Property="Background" Value="#EF4444"/>
         </Style>
         <Style Selector="TextBlock.header">
             <Setter Property="FontSize" Value="14"/>
@@ -74,30 +106,33 @@
             <Setter Property="Padding" Value="12,10"/>
             <Setter Property="FontSize" Value="14"/>
         </Style>
-        <Style Selector="ListBoxItem.session">
-            <Setter Property="Padding" Value="8"/>
-            <Setter Property="Margin" Value="0,2"/>
-            <Setter Property="CornerRadius" Value="6"/>
-        </Style>
-        <Style Selector="ListBoxItem.session:pointerover">
-            <Setter Property="Background" Value="#374151"/>
-        </Style>
-        <Style Selector="ListBoxItem.session:selected">
-            <Setter Property="Background" Value="#3B82F6"/>
-        </Style>
     </Window.Styles>
 
     <Grid RowDefinitions="Auto,*,Auto" Margin="16">
         <Border Grid.Row="0" Classes="card" Margin="0,0,0,12">
-            <Grid ColumnDefinitions="*,Auto,Auto">
-                <StackPanel>
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+                <StackPanel Grid.Column="0">
                     <TextBlock Text="智能电脑助手" Classes="header" FontSize="18"/>
-                    <TextBlock Text="让AI帮你操作电脑" Classes="subtitle" Margin="0,4,0,0"/>
+                    <TextBlock Text="{Binding ListeningStatus}" Classes="subtitle" Margin="0,4,0,0"/>
                 </StackPanel>
-                <Button Grid.Column="1" Command="{Binding ToggleHistoryPanelCommand}" Classes="secondary" Margin="0,0,8,0" ToolTip.Tip="切换历史面板">
-                    <TextBlock Text="📜"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" Margin="0,0,12,0">
+                    <Button Command="{Binding ToggleListeningCommand}" Classes="listen"
+                            ToolTip.Tip="语音输入">
+                        <TextBlock Text="🎤" FontSize="18"/>
+                    </Button>
+                    <Button Command="{Binding SpeakLastResponseCommand}" Classes="icon" ToolTip.Tip="朗读回复">
+                        <TextBlock Text="🔊" FontSize="16"/>
+                    </Button>
+                </StackPanel>
+                <Button Grid.Column="2" Command="{Binding SearchAndLearnCommand}" Classes="action" Margin="0,0,8,0" ToolTip.Tip="搜索学习">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <TextBlock Text="🔍" FontSize="14"/>
+                        <TextBlock Text="学习"/>
+                    </StackPanel>
                 </Button>
-                <Button Grid.Column="2" Command="{Binding NewSessionCommand}" Classes="action" Content="新对话"/>
+                <Button Grid.Column="3" Command="{Binding OpenSettingsCommand}" Classes="secondary" ToolTip.Tip="设置">
+                    <TextBlock Text="⚙️" FontSize="16"/>
+                </Button>
             </Grid>
         </Border>
 
@@ -107,9 +142,7 @@
                 <Grid RowDefinitions="Auto,*">
                     <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,12">
                         <TextBlock Text="历史记录" Classes="header"/>
-                        <Button Grid.Column="1" Command="{Binding OpenSettingsCommand}" Classes="secondary" Padding="6" ToolTip.Tip="设置">
-                            <TextBlock Text="⚙️" FontSize="12"/>
-                        </Button>
+                        <Button Grid.Column="1" Command="{Binding NewSessionCommand}" Classes="action" Content="+ 新对话" Padding="8,4"/>
                     </Grid>
                     <ListBox Grid.Row="1" ItemsSource="{Binding SessionHistory}" SelectedItem="{Binding CurrentSession}"
                              Background="Transparent" BorderThickness="0">
@@ -123,16 +156,16 @@
                                             <TextBlock Text="{Binding StartedAt, StringFormat='{}{0:MM-dd HH:mm}'}"
                                                        Classes="subtitle" FontSize="11"/>
                                             <TextBlock Text="•" Classes="subtitle"/>
-                                            <TextBlock Text="{Binding Duration, StringFormat='{}{0}s'}"
+                                            <TextBlock Text="{Binding Duration, StringFormat='{}{0}秒'}"
                                                        Classes="subtitle" FontSize="11"/>
                                         </StackPanel>
                                         <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="4" Margin="0,6,0,0">
                                             <Button Command="{Binding $parent[ListBox].((vm:MainWindowViewModel)DataContext).LoadSessionCommand}"
                                                     CommandParameter="{Binding}"
-                                                    Classes="secondary" Content="续写" Padding="6,2" FontSize="11"/>
+                                                    Classes="listbtn" Content="续写"/>
                                             <Button Command="{Binding $parent[ListBox].((vm:MainWindowViewModel)DataContext).DeleteSessionCommand}"
                                                     CommandParameter="{Binding}"
-                                                    Classes="danger" Content="删除" Padding="6,2" FontSize="11"/>
+                                                    Classes="listbtn" Content="删除"/>
                                         </StackPanel>
                                     </Grid>
                                 </Border>
@@ -172,35 +205,43 @@
                 </Border>
 
                 <Border Grid.Row="1" Classes="card">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <ItemsControl ItemsSource="{Binding Messages}" Margin="4">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Margin="0,8" Spacing="4">
-                                        <Border Background="#3B82F6" CornerRadius="12,12,4,12" Padding="12,10"
-                                                MaxWidth="500" HorizontalAlignment="Right"
-                                                IsVisible="{Binding Role, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=User}">
-                                            <TextBlock Text="{Binding Content}" TextWrapping="Wrap" Foreground="White" FontSize="13"/>
-                                        </Border>
-                                        <Border Background="#374151" CornerRadius="12,12,12,4" Padding="12,10"
-                                                MaxWidth="500" HorizontalAlignment="Left"
-                                                IsVisible="{Binding Role, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Assistant}">
-                                            <TextBlock Text="{Binding Content}" TextWrapping="Wrap" Foreground="White" FontSize="13"/>
-                                        </Border>
-                                        <TextBlock Text="{Binding CreatedAt, StringFormat='{}{0:HH:mm:ss}'}"
-                                                   Classes="subtitle" FontSize="10" Margin="0,2"
-                                                   HorizontalAlignment="{Binding Role, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=User,
-                                                                                    TargetNullValue=Right, FallbackValue=Right}"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
+                    <Grid RowDefinitions="Auto,*">
+                        <Grid Grid.Row="0" ColumnDefinitions="Auto,*" Margin="0,0,0,8" IsVisible="{Binding IsProcessing}">
+                            <Border Background="#3B82F6" CornerRadius="4" Padding="8,4" Margin="0,0,8,0">
+                                <TextBlock Text="思考中..." Foreground="White" FontSize="11"/>
+                            </Border>
+                            <ProgressBar Grid.Column="1" IsIndeterminate="True" Height="2"
+                                         Foreground="#3B82F6" Background="#374151"/>
+                        </Grid>
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            <ItemsControl ItemsSource="{Binding Messages}" Margin="4">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Margin="0,8" Spacing="4">
+                                            <Border Background="#3B82F6" CornerRadius="12,12,4,12" Padding="12,10"
+                                                    MaxWidth="500" HorizontalAlignment="Right"
+                                                    IsVisible="{Binding Role, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=User}">
+                                                <TextBlock Text="{Binding Content}" TextWrapping="Wrap" Foreground="White" FontSize="13"/>
+                                            </Border>
+                                            <Border Background="#374151" CornerRadius="12,12,12,4" Padding="12,10"
+                                                    MaxWidth="500" HorizontalAlignment="Left"
+                                                    IsVisible="{Binding Role, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Assistant}">
+                                                <TextBlock Text="{Binding Content}" TextWrapping="Wrap" Foreground="White" FontSize="13"/>
+                                            </Border>
+                                            <TextBlock Text="{Binding CreatedAt, StringFormat='{}{0:HH:mm:ss}'}"
+                                                       Classes="subtitle" FontSize="10" Margin="0,2"
+                                                       HorizontalAlignment="Right"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
                 </Border>
 
                 <Border Grid.Row="2" Classes="card" Margin="0,12,0,0">
-                    <Grid ColumnDefinitions="*,Auto,Auto">
-                        <TextBox Text="{Binding UserInput}" Classes="input"
+                    <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto">
+                        <TextBox Grid.Column="0" Text="{Binding UserInput}" Classes="input"
                                  Watermark="输入指令... (按 Enter 发送)"
                                  Margin="0,0,12,0">
                             <TextBox.KeyBindings>
@@ -208,12 +249,18 @@
                             </TextBox.KeyBindings>
                         </TextBox>
                         <Button Grid.Column="1" Command="{Binding SendMessageCommand}" Classes="action"
-                                IsEnabled="{Binding !IsProcessing}" Margin="0,0,8,0">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <TextBlock Text="发送" VerticalAlignment="Center"/>
-                            </StackPanel>
+                                IsEnabled="{Binding !IsProcessing}" Margin="0,0,8,0" ToolTip.Tip="发送">
+                            <TextBlock Text="发送"/>
                         </Button>
-                        <Button Grid.Column="2" Command="{Binding EndSessionCommand}" Classes="danger">
+                        <Button Grid.Column="2" Command="{Binding ExecuteTaskCommand}" Classes="secondary"
+                                IsEnabled="{Binding !IsProcessing}" Margin="0,0,8,0" ToolTip.Tip="执行任务">
+                            <TextBlock Text="执行"/>
+                        </Button>
+                        <Button Grid.Column="3" Command="{Binding ToggleHistoryPanelCommand}" Classes="secondary"
+                                Margin="0,0,8,0" ToolTip.Tip="切换历史">
+                            <TextBlock Text="📜"/>
+                        </Button>
+                        <Button Grid.Column="4" Command="{Binding EndSessionCommand}" Classes="danger" ToolTip.Tip="结束对话">
                             <TextBlock Text="结束"/>
                         </Button>
                     </Grid>

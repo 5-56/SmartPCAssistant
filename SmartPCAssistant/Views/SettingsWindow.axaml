@@ -1,0 +1,139 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:SmartPCAssistant.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="600"
+        x:Class="SmartPCAssistant.Views.SettingsWindow"
+        x:DataType="vm:SettingsViewModel"
+        Title="设置"
+        Width="600"
+        Height="650"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+
+    <Design.DataContext>
+        <vm:SettingsViewModel/>
+    </Design.DataContext>
+
+    <Window.Styles>
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="#1E1E2E"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+        </Style>
+        <Style Selector="TextBlock.section">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+        </Style>
+        <Style Selector="TextBlock.label">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#9CA3AF"/>
+            <Setter Property="Margin" Value="0,8,0,4"/>
+        </Style>
+        <Style Selector="TextBox.input">
+            <Setter Property="Background" Value="#374151"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+        <Style Selector="Button.action">
+            <Setter Property="Background" Value="#3B82F6"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+        <Style Selector="Button.action:pointerover">
+            <Setter Property="Background" Value="#2563EB"/>
+        </Style>
+        <Style Selector="Button.secondary">
+            <Setter Property="Background" Value="#374151"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+        <Style Selector="ComboBox">
+            <Setter Property="Background" Value="#374151"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="10,8"/>
+        </Style>
+
+    </Window.Styles>
+
+    <ScrollViewer>
+        <StackPanel Margin="16">
+            <TextBlock Text="AI 提供商设置" Classes="section"/>
+            <Border Classes="card">
+                <StackPanel>
+                    <TextBlock Text="提供商" Classes="label"/>
+                    <ComboBox ItemsSource="{Binding AvailableProviders}"
+                              SelectedItem="{Binding SelectedProvider}"
+                              HorizontalAlignment="Stretch" Margin="0,0,0,12"/>
+
+                    <TextBlock Text="API URL" Classes="label"/>
+                    <TextBox Text="{Binding ApiUrl}" Classes="input" Watermark="https://api.openai.com/v1" Margin="0,0,0,12"/>
+
+                    <TextBlock Text="API Key" Classes="label"/>
+                    <TextBox Text="{Binding ApiKey}" Classes="input"
+                             PasswordChar="*" Watermark="输入你的 API Key" Margin="0,0,0,12"/>
+
+                    <TextBlock Text="模型" Classes="label"/>
+                    <ComboBox ItemsSource="{Binding AvailableModels}"
+                              SelectedItem="{Binding SelectedModel}"
+                              HorizontalAlignment="Stretch" Margin="0,0,0,12"/>
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="设为默认提供商" Classes="label" Margin="0"/>
+                            <TextBlock Text="启动时自动使用此配置" FontSize="11" Foreground="#6B7280"/>
+                        </StackPanel>
+                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding IsDefault}" VerticalAlignment="Center"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="系统设置" Classes="section" Margin="0,12,0,0"/>
+            <Border Classes="card">
+                <StackPanel>
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="语音交互" FontSize="13" Foreground="White"/>
+                            <TextBlock Text="启用语音输入和语音播报" FontSize="11" Foreground="#6B7280"/>
+                        </StackPanel>
+                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding IsVoiceEnabled}" VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="沙箱隔离" FontSize="13" Foreground="White"/>
+                            <TextBlock Text="在隔离环境中执行危险操作" FontSize="11" Foreground="#6B7280"/>
+                        </StackPanel>
+                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding IsSandboxEnabled}" VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <TextBlock Text="默认浏览器" Classes="label" Margin="0"/>
+                    <ComboBox ItemsSource="{Binding AvailableBrowsers}"
+                              SelectedItem="{Binding SelectedBrowser}"
+                              HorizontalAlignment="Stretch"/>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="状态" Classes="section" Margin="0,12,0,0"/>
+            <Border Classes="card">
+                <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+                    <TextBlock Grid.Column="0" Text="{Binding StatusMessage}" Foreground="#22C55E" VerticalAlignment="Center"/>
+                    <Button Grid.Column="1" Command="{Binding TestConnectionCommand}" Classes="secondary" Content="测试连接" Margin="0,0,8,0"/>
+                    <Button Grid.Column="2" Command="{Binding ResetToDefaultsCommand}" Classes="secondary" Content="重置" Margin="0,0,8,0"/>
+                    <Button Grid.Column="3" Command="{Binding SaveSettingsCommand}" Classes="action" Content="保存设置"/>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Window>
