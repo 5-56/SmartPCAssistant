@@ -82,16 +82,18 @@
 # C/C++/Go/Rust
 *.o
 *.obj
-*.exe
 *.out
 *.app
-*.dll
 *.dylib
 *.so
 *.test
 **/target/
 **/go.work
 **/Cargo.lock
+
+# .NET
+**/bin/
+**/obj/
 
 # Ruby
 *.gem
