@@ -1,0 +1,40 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="80" d:DesignHeight="80"
+        x:Class="SmartPCAssistant.Views.FloatBallWindow"
+        Title="智能助手"
+        Width="80"
+        Height="80"
+        SystemDecorations="None"
+        TransparencyLevelHint="Transparent"
+        CanResize="False"
+        Topmost="True"
+        ShowInTaskbar="False"
+        ExtendClientAreaToDecorationsHint="True"
+        PointerPressed="OnPointerPressed"
+        PointerReleased="OnPointerReleased"
+        PointerMoved="OnPointerMoved">
+
+    <Border Background="#3B82F6"
+            CornerRadius="30"
+            Width="60"
+            Height="60"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            BoxShadow="0 4 12 0 #40000000">
+        <Border.Styles>
+            <Style Selector="Border:pointerover">
+                <Setter Property="Background" Value="#2563EB"/>
+            </Style>
+        </Border.Styles>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+            <TextBlock Text="AI"
+                       FontSize="18"
+                       FontWeight="Bold"
+                       Foreground="White"
+                       HorizontalAlignment="Center"/>
+        </StackPanel>
+    </Border>
+</Window>

@@ -1,0 +1,224 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:SmartPCAssistant.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
+        x:Class="SmartPCAssistant.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="智能电脑助手"
+        Width="1000"
+        Height="700"
+        MinWidth="600"
+        MinHeight="500"
+        WindowStartupLocation="CenterScreen">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Window.Styles>
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="#1E1E2E"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="12"/>
+        </Style>
+        <Style Selector="Button.action">
+            <Setter Property="Background" Value="#3B82F6"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+        <Style Selector="Button.action:pointerover">
+            <Setter Property="Background" Value="#2563EB"/>
+        </Style>
+        <Style Selector="Button.secondary">
+            <Setter Property="Background" Value="#374151"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+        <Style Selector="Button.secondary:pointerover">
+            <Setter Property="Background" Value="#4B5563"/>
+        </Style>
+        <Style Selector="Button.danger">
+            <Setter Property="Background" Value="#EF4444"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+        <Style Selector="Button.danger:pointerover">
+            <Setter Property="Background" Value="#DC2626"/>
+        </Style>
+        <Style Selector="TextBlock.header">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style Selector="TextBlock.subtitle">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="#9CA3AF"/>
+        </Style>
+        <Style Selector="TextBlock.body">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#E5E7EB"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+        <Style Selector="TextBox.input">
+            <Setter Property="Background" Value="#374151"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+        <Style Selector="ListBoxItem.session">
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="CornerRadius" Value="6"/>
+        </Style>
+        <Style Selector="ListBoxItem.session:pointerover">
+            <Setter Property="Background" Value="#374151"/>
+        </Style>
+        <Style Selector="ListBoxItem.session:selected">
+            <Setter Property="Background" Value="#3B82F6"/>
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,*,Auto" Margin="16">
+        <Border Grid.Row="0" Classes="card" Margin="0,0,0,12">
+            <Grid ColumnDefinitions="*,Auto,Auto">
+                <StackPanel>
+                    <TextBlock Text="智能电脑助手" Classes="header" FontSize="18"/>
+                    <TextBlock Text="让AI帮你操作电脑" Classes="subtitle" Margin="0,4,0,0"/>
+                </StackPanel>
+                <Button Grid.Column="1" Command="{Binding ToggleHistoryPanelCommand}" Classes="secondary" Margin="0,0,8,0" ToolTip.Tip="切换历史面板">
+                    <TextBlock Text="📜"/>
+                </Button>
+                <Button Grid.Column="2" Command="{Binding NewSessionCommand}" Classes="action" Content="新对话"/>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1" ColumnDefinitions="280,*">
+            <Border Grid.Column="0" Classes="card" Margin="0,0,12,0"
+                    IsVisible="{Binding IsHistoryPanelVisible}">
+                <Grid RowDefinitions="Auto,*">
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,12">
+                        <TextBlock Text="历史记录" Classes="header"/>
+                        <Button Grid.Column="1" Command="{Binding OpenSettingsCommand}" Classes="secondary" Padding="6" ToolTip.Tip="设置">
+                            <TextBlock Text="⚙️" FontSize="12"/>
+                        </Button>
+                    </Grid>
+                    <ListBox Grid.Row="1" ItemsSource="{Binding SessionHistory}" SelectedItem="{Binding CurrentSession}"
+                             Background="Transparent" BorderThickness="0">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Classes="card" Padding="8" Margin="0,2" Background="#2D2D3D">
+                                    <Grid RowDefinitions="Auto,Auto,Auto">
+                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
+                                                   Foreground="White" FontSize="13"/>
+                                        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                            <TextBlock Text="{Binding StartedAt, StringFormat='{}{0:MM-dd HH:mm}'}"
+                                                       Classes="subtitle" FontSize="11"/>
+                                            <TextBlock Text="•" Classes="subtitle"/>
+                                            <TextBlock Text="{Binding Duration, StringFormat='{}{0}s'}"
+                                                       Classes="subtitle" FontSize="11"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="4" Margin="0,6,0,0">
+                                            <Button Command="{Binding $parent[ListBox].((vm:MainWindowViewModel)DataContext).LoadSessionCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    Classes="secondary" Content="续写" Padding="6,2" FontSize="11"/>
+                                            <Button Command="{Binding $parent[ListBox].((vm:MainWindowViewModel)DataContext).DeleteSessionCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    Classes="danger" Content="删除" Padding="6,2" FontSize="11"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Column="1" RowDefinitions="Auto,*,Auto">
+                <Border Grid.Row="0" Classes="card" Margin="0,0,0,12"
+                        IsVisible="{Binding TaskSteps.Count}">
+                    <StackPanel>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel>
+                                <TextBlock Text="{Binding CurrentTaskTitle}" Classes="header"/>
+                                <TextBlock Text="{Binding TaskStatus}" Classes="subtitle" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <TextBlock Grid.Column="1" Text="{Binding TaskProgress, StringFormat='{}{0}%'}"
+                                       Classes="header" FontSize="16" VerticalAlignment="Center"/>
+                        </Grid>
+                        <ProgressBar Value="{Binding TaskProgress}" Maximum="100" Height="6" Margin="0,10,0,0"
+                                     Foreground="#3B82F6" Background="#374151"/>
+                        <ItemsControl ItemsSource="{Binding TaskSteps}" Margin="0,10,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,3">
+                                        <TextBlock Text="✓" Foreground="#22C55E" FontWeight="Bold" FontSize="12"
+                                                   IsVisible="{Binding Status, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                                        <TextBlock Text="{Binding Description}" Classes="body" FontSize="12"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Row="1" Classes="card">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding Messages}" Margin="4">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="0,8" Spacing="4">
+                                        <Border Background="#3B82F6" CornerRadius="12,12,4,12" Padding="12,10"
+                                                MaxWidth="500" HorizontalAlignment="Right"
+                                                IsVisible="{Binding Role, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=User}">
+                                            <TextBlock Text="{Binding Content}" TextWrapping="Wrap" Foreground="White" FontSize="13"/>
+                                        </Border>
+                                        <Border Background="#374151" CornerRadius="12,12,12,4" Padding="12,10"
+                                                MaxWidth="500" HorizontalAlignment="Left"
+                                                IsVisible="{Binding Role, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Assistant}">
+                                            <TextBlock Text="{Binding Content}" TextWrapping="Wrap" Foreground="White" FontSize="13"/>
+                                        </Border>
+                                        <TextBlock Text="{Binding CreatedAt, StringFormat='{}{0:HH:mm:ss}'}"
+                                                   Classes="subtitle" FontSize="10" Margin="0,2"
+                                                   HorizontalAlignment="{Binding Role, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=User,
+                                                                                    TargetNullValue=Right, FallbackValue=Right}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Border>
+
+                <Border Grid.Row="2" Classes="card" Margin="0,12,0,0">
+                    <Grid ColumnDefinitions="*,Auto,Auto">
+                        <TextBox Text="{Binding UserInput}" Classes="input"
+                                 Watermark="输入指令... (按 Enter 发送)"
+                                 Margin="0,0,12,0">
+                            <TextBox.KeyBindings>
+                                <KeyBinding Gesture="Enter" Command="{Binding SendMessageCommand}"/>
+                            </TextBox.KeyBindings>
+                        </TextBox>
+                        <Button Grid.Column="1" Command="{Binding SendMessageCommand}" Classes="action"
+                                IsEnabled="{Binding !IsProcessing}" Margin="0,0,8,0">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <TextBlock Text="发送" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Grid.Column="2" Command="{Binding EndSessionCommand}" Classes="danger">
+                            <TextBlock Text="结束"/>
+                        </Button>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

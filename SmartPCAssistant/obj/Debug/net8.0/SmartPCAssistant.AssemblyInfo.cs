@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SmartPCAssistant")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+32d15fde720ea64668d07f1bcacfec7ff58a53c0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e88ba040d8e081ffbe5bd9cf7490f622282956a2")]
 [assembly: System.Reflection.AssemblyProductAttribute("SmartPCAssistant")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SmartPCAssistant")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
