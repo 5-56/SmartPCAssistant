@@ -14,6 +14,9 @@ on:
 jobs:
   build-windows:
     runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: SmartPCAssistant
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,11 +34,12 @@ jobs:
 
       - name: Publish
         run: |
-          dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o ./publish
+          dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o ../publish
 
       - name: Create ZIP
+        shell: pwsh
         run: |
-          Compress-Archive -Path ./publish/* -DestinationPath ./SmartPCAssistant-${{ github.ref_name }}-win-x64.zip -Force
+          Compress-Archive -Path ../publish/* -DestinationPath ./SmartPCAssistant-${{ github.ref_name }}-win-x64.zip -Force
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
@@ -61,18 +65,18 @@ jobs:
   build-portable:
     runs-on: ubuntu-latest
     container: mcr.microsoft.com/dotnet/sdk:8.0
+    defaults:
+      run:
+        working-directory: SmartPCAssistant
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup .NET
-        run: dotnet restore
-
       - name: Build
-        run: dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -o ./publish
+        run: dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -o ../publish
 
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: SmartPCAssistant-win-x64
-          path: ./publish/SmartPCAssistant.exe
+          path: ./publish/SmartPCAssistant
